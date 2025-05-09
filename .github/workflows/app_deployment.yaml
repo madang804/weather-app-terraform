@@ -64,7 +64,7 @@ jobs:
       - name: Run Smoke Test
         run: |
           # Start server in the background
-          gunicorn application:application &
+          gunicorn application:application --daemon
 
           # Wait for the server to start
           sleep 10
@@ -80,7 +80,7 @@ jobs:
           
           # Test API endpoint
           API_RESPONSE=$(curl -s http://127.0.0.1:5000/api/v1.0/weather?location=London)
-          if ! echo "API_RESPONSE" | grep -q '"weather"'; then
+          if ! echo "$API_RESPONSE" | grep -q '"weather"'; then
             printf "Error: API test failed"
             pkill -f gunicorn
             exit 1
@@ -88,7 +88,7 @@ jobs:
             printf "API test passed: API returned valid response\n"
 
           API_RESPONSE=$(curl -s http://127.0.0.1:5000/api/v1.0/temperature?location=Manchester)
-          if ! echo "API_RESPONSE" | grep -q '"temperature"'; then
+          if ! echo "$API_RESPONSE" | grep -q '"temperature"'; then
             printf "Error: API test failed"
             pkill -f gunicorn
             exit 1
@@ -96,7 +96,7 @@ jobs:
             printf "API test passed: API returned valid response\n"
 
           API_RESPONSE=$(curl -s http://127.0.0.1:5000/api/v1.0/wind?location=Glasgow)
-          if ! echo "API_RESPONSE" | grep -q '"wind"' && grep -q '"speed"'; then
+          if ! echo "$API_RESPONSE" | grep -q '"wind speed"' && grep -q '"speed direction"'; then
             printf "Error: API test failed"
             pkill -f gunicorn
             exit 1
@@ -104,7 +104,7 @@ jobs:
             printf "API test passed: API returned valid response\n"
 
           API_RESPONSE=$(curl -s http://127.0.0.1:5000/api/v1.0/humidity?location=Birmingham)
-          if ! echo "API_RESPONSE" | grep -q '"humidity"'; then
+          if ! echo "$API_RESPONSE" | grep -q '"humidity"'; then
             printf "Error: API test failed"
             pkill -f gunicorn
             exit 1

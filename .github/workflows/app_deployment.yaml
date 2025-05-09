@@ -55,9 +55,64 @@ jobs:
         run: |
           python3 -m pip install --upgrade pip
           pip install -r requirements.txt
+          pip install pytest
 
-      - name: Run tests
+      - name: Run Unit Tests
         run: |
-          python3 -m unittest discover -s tests
-          # python3 -m pytest tests
-          # python3 -m pytest tests --disable-warnings
+          python3 -m pytest tests/ -v
+      
+      - name: Run Smoke Test
+        run: |
+          # Start server in the background
+          gunicorn application:application &
+
+          # Wait for the server to start
+          sleep 10
+
+          # Test homepage
+          HTTP_CODE=$(curl -so /dev/null -w "%{http_code}" http://127.0.0.1:5000)
+          if [ "$HTTP_CODE" -ne 200 ]; then
+            printf "Error: Smoke test failed: Homepage returned $HTTP_CODE\n"
+            pkill -f gunicorn
+            exit 1
+          fi
+            printf "Smoke test passed: Homepage returned $HTTP_CODE\n"
+          
+          # Test API endpoint
+          API_RESPONSE=$(curl -s http://127.0.0.1:5000/api/v1.0/weather?location=London)
+          if ! echo "API_RESPONSE" | grep -q '"weather"'; then
+            printf "Error: API test failed"
+            pkill -f gunicorn
+            exit 1
+          fi
+            printf "API test passed: API returned valid response\n"
+
+          API_RESPONSE=$(curl -s http://127.0.0.1:5000/api/v1.0/temperature?location=Manchester)
+          if ! echo "API_RESPONSE" | grep -q '"temperature"'; then
+            printf "Error: API test failed"
+            pkill -f gunicorn
+            exit 1
+          fi
+            printf "API test passed: API returned valid response\n"
+
+          API_RESPONSE=$(curl -s http://127.0.0.1:5000/api/v1.0/wind?location=Glasgow)
+          if ! echo "API_RESPONSE" | grep -q '"wind"' && grep -q '"speed"'; then
+            printf "Error: API test failed"
+            pkill -f gunicorn
+            exit 1
+          fi
+            printf "API test passed: API returned valid response\n"
+
+          API_RESPONSE=$(curl -s http://127.0.0.1:5000/api/v1.0/humidity?location=Birmingham)
+          if ! echo "API_RESPONSE" | grep -q '"humidity"'; then
+            printf "Error: API test failed"
+            pkill -f gunicorn
+            exit 1
+          fi
+            printf "API test passed: API returned valid response\n"
+
+          # Clean up
+          pkill -f gunicorn
+          printf "All smoke tests passed\n"
+
+      

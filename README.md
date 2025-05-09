@@ -185,12 +185,6 @@ The API is designed to simulate weather data for a given location.
 
 The Flask app is deployed to AWS Elastic Beanstalk via terraform (IaC). Below is a step-by-step guide.
 
-#### 1. Zip Application Files
-- Create a `.zip` file that includes `application.py`, `requirements.txt` and `Procfile`.
-
-<details>
-<summary>Windows</summary>
-
 ### Prerequisites
 - terraform installed.
 - awscli installed.

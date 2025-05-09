@@ -4,6 +4,7 @@ import random
 
 application = Flask(__name__)
 
+
 @application.route('/')
 def home():
     return '''
@@ -18,6 +19,7 @@ def home():
         <ul>/api/v1.0/humidity?location=<b>&#60;input location&#62;</b></ul>
     '''
 
+
 @application.route('/api/v1.0/weather')
 def weather():
     location = request.args.get('location')
@@ -28,6 +30,7 @@ def weather():
         'weather': weather
     })
 
+
 @application.route('/api/v1.0/temperature')
 def temperature():
     location = request.args.get('location')
@@ -36,6 +39,7 @@ def temperature():
         'location': location,
         'temperature': f'{int(temperature)} °C'
     })
+
 
 @application.route('/api/v1.0/wind')
 def wind():
@@ -47,6 +51,7 @@ def wind():
         'wind speed': f'{int(wind_speed)} kts',
         'wind direction': f'{int(wind_direction)} deg'
     })
+
 
 @application.route('/api/v1.0/humidity')
 def humidity():

@@ -9,7 +9,7 @@ application = Flask(__name__)
 def home():
     return '''
         <h1>How to make an API call</h1>
-        <h3>Append the following path and your chosen location after the url 
+        <h3>Append the following path and your chosen location after the url
         to get the current weather</h3>
         <ul>/api/v1.0/weather?location=<b>&#60;input location&#62;</b></ul>
         <h3>Append the following path and your chosen location after the url
@@ -28,7 +28,7 @@ def home():
 def weather():
     location = request.args.get('location')
     weather_list = ['rain', 'hurricanes', 'cloudy', 'partly cloudy',
-                    'blizzard', 'tornado', 'thunderstorm', 'fog', 
+                    'blizzard', 'tornado', 'thunderstorm', 'fog',
                     'lightning', 'snow', 'wind', 'hail', 'winter storm',
                     'stormy']
     weather = random.choice(weather_list)

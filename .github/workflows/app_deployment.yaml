@@ -1,6 +1,6 @@
 name: Flask App Deployment
 on:
-  workflow_dipatches:
+  workflow_dispatch:
     # push:
     #   branches:
     #     - main

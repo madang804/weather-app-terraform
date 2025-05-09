@@ -96,7 +96,7 @@ jobs:
             printf "API test passed: API returned valid response\n"
 
           API_RESPONSE=$(curl -s http://127.0.0.1:5000/api/v1.0/wind?location=Glasgow)
-          if ! echo "$API_RESPONSE" | grep -q '"wind speed"' && grep -q '"speed direction"'; then
+          if ! echo "$API_RESPONSE" | grep -q '"wind speed"'; then
             printf "Error: API test failed"
             pkill -f gunicorn
             exit 1

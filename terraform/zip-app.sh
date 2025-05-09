@@ -1,4 +1,9 @@
 #!/usr/bin/env bash
-echo "Zipping appllication.py and requirements.txt"
-zip application.zip application.py requirements.txt
-echo "Action completed; File: application.zip"
+
+set -euo pipefail
+
+trap 'printf "Error: Zipping failed"; exit 1' ERR
+
+printf "Zipping appllication.py, requirements.txt, Procfile..."
+zip application.zip ../application.py ../requirements.txt ../Procfile
+printf "Zipping completed\nFile: application.zip"

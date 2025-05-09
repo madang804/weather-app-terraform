@@ -1,0 +1,126 @@
+terraform {
+    required_providers {
+        aws = {
+            source  = "hashicorp/aws"
+            version = "~>5.96.0"
+        }
+    }
+}
+
+provider "aws" {
+    region = var.region
+    default_tags {
+        tags = {
+            Environment = "Production"
+            Name = "WeatherAPI"
+        }
+    }
+}
+
+# Create IAM Role
+resource "aws_iam_role" "role" {
+    name = "elasticbeanstalk-ec2role"
+    assume_role_policy = jsonencode({
+        Version = "2012-10-17"
+        Statement = [
+            {
+                Action = "sts:AssumeRole"
+                Effect = "Allow"
+                Sid    = ""
+                Principal = {
+                    Service = "ec2.amazonaws.com"
+                }
+            },
+        ]
+    })
+}
+
+# Create EC2 Instance Profile
+resource "aws_iam_instance_profile" "ec2_instance_profile" {
+    name = aws_iam_role.role.name
+    role = aws_iam_role.role.name
+}
+
+# Attach Policies to the IAM Role
+resource "aws_iam_role_policy_attachment" "role_policy_attachment" {
+    for_each = toset([
+        "arn:aws:iam::aws:policy/AWSElasticBeanstalkWebTier",
+        "arn:aws:iam::aws:policy/AWSElasticBeanstalkMulticontainerDocker",
+        "arn:aws:iam::aws:policy/AWSElasticBeanstalkWorkerTier",
+    ])
+    
+    policy_arn = each.value
+    role = aws_iam_role.role.name
+}
+
+# Create S3 Bucket to store Flask app
+resource "aws_s3_bucket" "app_bucket" {
+    bucket = "${aws_elastic_beanstalk_application.app.name}-bucket"
+}
+
+# Create S3 Bucket Object i.e. zipped Flask app
+resource "aws_s3_object" "app_object" {
+    bucket = aws_s3_bucket.app_bucket.id
+    key    = "application.zip"
+    source = "application.zip"
+    
+#    depends_on = [null_resource.zip_app]
+}
+
+#resource "null_resource" "zip_app" {
+#    provisioner "local-exec" {
+#        command = "./zip_app.sh"
+#    }
+#
+#    triggers = {
+#        always_run = "${timestamp()}"
+#    }
+#}
+
+# Create Elastic Beanstalk Application
+resource "aws_elastic_beanstalk_application" "app" {
+    name        = var.app_name
+    description = "Flask weather app"
+
+    appversion_lifecycle {
+        service_role          = aws_iam_role.role.arn
+        max_count             = 128
+        delete_source_from_s3 = true
+    }
+}
+
+# Create a version of Flask app
+resource "aws_elastic_beanstalk_application_version" "app_version" {
+    name        = var.ver
+    application = aws_elastic_beanstalk_application.app.name
+    description = "application version created by terraform"
+    bucket      = aws_s3_bucket.app_bucket.id
+    key         = aws_s3_object.app_object.id
+}
+
+# Create Elastic Beanstalk Environment
+resource "aws_elastic_beanstalk_environment" "env" {
+    name                = var.env_name
+    application         = aws_elastic_beanstalk_application.app.name
+    cname_prefix        = "weather-api"
+    version_label       = aws_elastic_beanstalk_application_version.app_version.name
+    solution_stack_name = "64bit Amazon Linux 2023 v4.5.1 running Python 3.11"
+
+    setting {
+        namespace = "aws:autoscaling:launchconfiguration"
+        name = "IamInstanceProfile"
+        value = aws_iam_instance_profile.ec2_instance_profile.name
+    }
+    
+    setting {
+        namespace = "aws:autoscaling:launchconfiguration"
+        name      = "InstanceType"
+        value     = "t2.micro"
+    }
+
+    setting {
+        namespace = "aws:elasticbeanstalk:environment"
+        name      = "LoadBalancerType"
+        value     = "application"
+    }
+}

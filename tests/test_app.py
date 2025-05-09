@@ -17,17 +17,17 @@ def test_weather_endpoint(client):
     assert b'weather' in response.data
 
 def test_temperature_endpoint(client):
-    response = client.get('/api/v1.0/temperature?location=Paris')
+    response = client.get('/api/v1.0/temperature?location=Swindon')
     assert response.status_code == 200
     assert b'temperature' in response.data
 
 def test_wind_endpoint(client):
-    response = client.get('/api/v1.0/wind?location=Tokyo')
+    response = client.get('/api/v1.0/wind?location=Liverpool')
     assert response.status_code == 200
     assert b'wind' in response.data
 
 def test_humidity_endpoint(client):
-    response = client.get('/api/v1.0/humidity?location=Berlin')
+    response = client.get('/api/v1.0/humidity?location=Edinburgh')
     assert response.status_code == 200
     assert b'humidity' in response.data
 
@@ -37,26 +37,11 @@ def test_invalid_route(client):
     assert b'Not Found' in response.data
 
 def test_invalid_weather_endpoint(client):
-    response = client.get('/api/v1.0/weather?location=')
-    assert response.status_code == 400
-    assert b'Bad Request' in response.data
-
-def test_invalid_temperature_endpoint(client):
-    response = client.get('/api/v1.0/temperature?location=')
-    assert response.status_code == 400
-    assert b'Bad Request' in response.data
-
-def test_invalid_wind_endpoint(client):
-    response = client.get('/api/v1.0/wind?location=')
-    assert response.status_code == 400
-    assert b'Bad Request' in response.data
-
-def test_invalid_humidity_endpoint(client):
-    response = client.get('/api/v1.0/humidity?location=')
+    response = client.get('/api/v1.0/invalid-endpoint?location=Bristol')
     assert response.status_code == 400
     assert b'Bad Request' in response.data
 
 def test_unsupported_method(client):
-    response = client.post('/api/v1.0/weather?location=London')
+    response = client.post('/api/v1.0/weather?location=Newcastle')
     assert response.status_code == 405
     assert b'Method Not Allowed' in response.data

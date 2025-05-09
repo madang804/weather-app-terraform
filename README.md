@@ -183,7 +183,7 @@ The API is designed to simulate weather data for a given location.
 
 ## Deploying to AWS Elastic Beanstalk
 
-The Flask app is deployed to AWS Elastic Beanstalk via the AWS Console. Below is a step-by-step guide.
+The Flask app is deployed to AWS Elastic Beanstalk via terraform (IaC). Below is a step-by-step guide.
 
 #### 1. Zip Application Files
 - Create a `.zip` file that includes `application.py`, `requirements.txt` and `Procfile`.
@@ -192,111 +192,50 @@ The Flask app is deployed to AWS Elastic Beanstalk via the AWS Console. Below is
 <summary>Windows</summary>
 
 ### Prerequisites
-- 7-Zip installed.
-  
-  CMD
-  ```cmd
-  "C:\Program Files\7-Zip\7z.exe" a -tzip application.zip application.py requirements.txt Procfile
-  ```
-  PowerShell
-  ```powershell
-  & "C:\Program Files\7-Zip\7z.exe" a -tzip application.zip application.py requirements.txt Procfile
-  ```
-</details>
+- terraform installed.
+- awscli installed.
+- curl installed.
+- jq installed (optional).
 
-<details>
-<summary>MacOS</summary>
-
-### Prerequisites
-- Zip installed.
-  ```bash
-  zip application.zip application.py requirements.txt Procfile
-  ```
-</details>
-
-<details>
-<summary>Linux</summary>
-
-### Prerequisites
-- Zip installed.
-  ```bash
-  zip application.zip application.py requirements.txt Procfile
-  ```
-</details>
-
-#### 2. Log In to AWS Management Console
-1. Go to the [AWS Elastic Beanstalk Console](https://console.aws.amazon.com/elasticbeanstalk).
-2. Click **Create Application**.
-
-#### 3. Create a New Elastic Beanstalk Application
-1. Under **Application information** name the application (e.g., `WeatherApp`).
-2. Under **Environment information**:
-   - Choose a domain prefix (e.g., `weather-app`) and check availability.
-   - Leave blank to auto-generate.
-3. Under **Platform**:
-   - Select **Python** and the appropriate **Platform Branch**.
-
-#### 4. Upload Flask Application
-1. Under **Application code**:
-   - Select **Upload your code**
-   - Set **Version label** to v1.0
-   - Upload `.zip` file created earlier.
-2. Click **Next**.
-3. Under **Service access**:
-   - Choose an **EC2 instance profile** from dropdown list.
-   - If none listed, create a new IAM role with these policies:
-     - AWSElasticBeanstalkWebTier
-     - AWSElasticBeanstalkWorkerTier
-     - AWSElasticBeanstalkMulticontainerDocker
-   - Click `Refresh` to refresh the dropdown list to find the new IAM role .
-4. Click **Skip to Review** or **Next** to continue through additional settings.
-5. Click **Submit** to deploy.
-
-#### 5. Monitor Deployment
-- Wait until you see **Environment successfully launched**.
-
-  ![eb-console.png](./png/console.png)
-
-#### 6. Test API
-1. Copy and paste app URL in browser (e.g., `http://weather-app.eu-west-2.elasticbeanstalk.com`).
-
-   ![weather-app.png](./png/weather-app.png)
-
-2. Test endpoints in browser.
-
-   ![weather.png](./png/weather.png)
-
-   ![temperature.png](./png/temperature.png)
-
-   ![wind.png](./png/wind.png)
-
-   ![humidity.png](./png/humidity.png)
-
-4. Test endpoints in terminal (optional).
-
-   ![curl-weather.png](./png/curl-weather.png)
-
-   ![curl-temperature.png](./png/curl-temperature.png)
-
-   ![curl-wind.png](./png/curl-wind.png)
-
-   ![curl-humidity.png](./png/curl-humidity.png)
-
-6. Clean Up
-   1. Terminate Elastic Beanstalk Environment
-      - Select your application environment from the `Environment` tab.
-      - Click `Actions` and select `Terminate Environment`.
-      - Confirm the termination.
-   3. Delete Elastic Beanstalk Application
-      - Select your application from the `Application` tab.
-      - Click `Actions` and select `Delete Application`.
-      - Confirm the deletion.
-   4. Delete S3 Bucket
-      - Go to S3 console.
-      - Select the bucket (e.g., elasticbeanstalk-region-account_id)
-      - Empty the bucket.
-      - Select `Permissions` tab and delete `Bucket policy`.
-      - Delete the bucket.
+1. Change to terraform directory
+   ```bash
+   cd terraform
+   ```
+1. Ensure `zip_app.sh` is executable.
+   ```bash
+   chmod +x zip_app.sh
+   ```
+2. Run these Terraform commands to deploy Flask app to AWS Elastic Beanstalk.
+   ```bash
+   terraform init
+   terraform plan
+   terraform apply -auto-approve
+   ```
+3. Test API
+   ```bash
+   curl -s http://weather-api.eu-west-2.elasticbeanstalk.com/api/v1.0/weather?location=london | jq .
+   ```
+   ```bash
+   curl -s http://weather-api.eu-west-2.elasticbeanstalk.com/api/v1.0/temperature?location=london | jq .
+   ```
+   ```bash
+   curl -s http://weather-api.eu-west-2.elasticbeanstalk.com/api/v1.0/wind?location=london | jq .
+   ```
+4. Run this command to destroy deployed AWS resources.
+   ```bash
+   terraform destroy -auto-approve
+   ```
+5. NOTE: AWS Elastic Beanstalk automatically creates an S3 bucket which is not managed by terraform code. AWS recommends to manually delete the bucket to avoid incurring charges.
+   ```bash
+   # Delete S3 bucket objects
+   aws s3 rm "s3://$(aws s3 ls | awk '{print $3}')" --recursive
+   
+   # Delete S3 bucket policy
+   aws s3api delete-bucket-policy --bucket "$(aws s3 ls | awk '{print $3}')"
+   
+   # Delete S3 bucket
+   aws s3api delete-bucket --bucket "$(aws s3 ls | awk '{print $3}')"
+   ```
 
 ---
 
@@ -304,6 +243,8 @@ The Flask app is deployed to AWS Elastic Beanstalk via the AWS Console. Below is
 
 - https://www.python.org
 - https://flask.palletsprojects.com
+- https://developer.hashicorp.com/terraform
+- https://registry.terraform.io/providers/hashicorp/aws/latest/docs
 - https://docs.aws.amazon.com/elasticbeanstalk/latest/dg/Welcome.html
 
 ---

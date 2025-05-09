@@ -1,9 +1,9 @@
 name: Flask App Deployment
 on:
   workflow_dipatches:
-    push:
-      branches:
-        - main
+    # push:
+    #   branches:
+    #     - main
 
 jobs:
   lint:

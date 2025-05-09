@@ -54,3 +54,4 @@ def test_unsupported_method(client):
     response = client.post('/api/v1.0/weather?location=Newcastle')
     assert response.status_code == 405
     assert b'Method Not Allowed' in response.data
+    

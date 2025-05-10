@@ -19,7 +19,7 @@ runs:
       uses: actions/cache@v4
       with:
         path: ~/.cache/pip
-        key: ${{ runner.os }}-pip3.12-${{ hashFiles('**/requirements.txt') }}
+        key: ${{ runner.os }}-pip3.12.3-${{ hashFiles('**/requirements.txt') }}
     - name: install dependencies
       id: install
       #if: steps.cache.outputs.cache-hit != 'true' || inputs.cache-dependencies != 'true'

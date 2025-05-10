@@ -17,20 +17,22 @@ jobs:
         with:
           python-version: '3.13'
 
-      - name: Cache Python dependencies
-        uses: actions/cache@v4
+      - name: Load and cache dependencies
+        id: lint
+        uses: ./.github/actions/cached-deps
         with:
-          path: ~/.cache/pip
-          key: ${{ runner.os }}-pip-${{ hashFiles('**/requirements.txt') }}
-
-      - name: Install dependencies
-        run: |
-          python -m pip install --upgrade pip
-          pip install -r requirements.txt
-          pip install flake8
-
+          cache-dependencies: 'false'
+          
       - name: Run linter
         run: flake8 .
+
+      - name: Output cache confirmation
+        run: |
+          if [[ "${{ steps.lint.outputs.cache-confirmation }}" != 'false' ]]; then
+            echo "Cache: True"
+          else
+            echo "Cache: False"
+          fi
 
   test:
     runs-on: ubuntu-latest
@@ -43,24 +45,16 @@ jobs:
         with:
           python-version: '3.13'
 
-      - name: Cache Python dependencies
-        uses: actions/cache@v4
+      - name: Load and cache dependencies
+        id: test
+        uses: ./.github/actions/cached-deps
         with:
-          path: ~/.cache/pip
-          key: ${{ runner.os }}-pip-${{ hashFiles('**/requirements.txt') }}
-          restore-keys: |
-            ${{ runner.os }}-pip-
+          cache-dependencies: 'true'
 
-      - name: Install dependencies
-        run: |
-          python3 -m pip install --upgrade pip
-          pip install -r requirements.txt
-          pip install pytest
+      - name: Run Unit Test
+        id: unit-test
+        run: python3 -m pytest tests/ -v
 
-      - name: Run Unit Tests
-        run: |
-          python3 -m pytest tests/ -v
-      
       - name: Run Smoke Test
         run: |
           # Start server with explicit binding

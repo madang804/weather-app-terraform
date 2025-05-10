@@ -19,15 +19,14 @@ runs:
       uses: actions/cache@v4
       with:
         path: ~/.cache/pip
-        key: ${{ runner.os }}-pip3.12.3-${{ hashFiles('**/requirements.txt') }}
+        key: ${{ runner.os }}-pip3.10-${{ hashFiles('**/requirements.txt') }}
     - name: install dependencies
       id: install
-      #if: steps.cache.outputs.cache-hit != 'true' || inputs.cache-dependencies != 'true'
-      if: inputs.cache-dependencies == 'true'    # Run always when caching is enabled
+      if: steps.cache.outputs.cache-hit != 'true' || inputs.cache-dependencies != 'true'
+      #if: inputs.cache-dependencies == 'true'    # Run always when caching is enabled
       run: |
         python3 -m pip install --upgrade pip
         pip install -r requirements.txt
         pip install flake8
-        pip install pytest
         echo "cache-confirmation=${{ inputs.cache-dependencies }}" > $GITHUB_OUTPUT
       shell: bash

@@ -25,7 +25,6 @@ runs:
       if: steps.cache.outputs.cache-hit != 'true' || inputs.cache-dependencies != 'true'
       #if: inputs.cache-dependencies == 'true'    # Run always when caching is enabled
       run: |
-        python3 -m pip install --upgrade pip
         pip install -r requirements.txt
         pip install flake8
         echo "cache-confirmation=${{ inputs.cache-dependencies }}" > $GITHUB_OUTPUT

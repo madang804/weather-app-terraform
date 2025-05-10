@@ -4,6 +4,7 @@ inputs:
     cache-dependencies:
       description: whether to cache dependencies or not
       required: false
+      default: false
       
 outputs:
     cache-confirmation:
@@ -22,7 +23,7 @@ runs:
         key: ${{ runner.os }}-pip3.10-${{ hashFiles('**/requirements.txt') }}
     - name: install dependencies
       id: install
-      if: steps.cache.outputs.cache-hit != 'true' || inputs.cache-dependencies != 'true'
+      #if: steps.cache.outputs.cache-hit != 'true' || inputs.cache-dependencies != 'true'
       #if: inputs.cache-dependencies == 'true'    # Run always when caching is enabled
       run: |
         pip install -r requirements.txt

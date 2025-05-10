@@ -63,56 +63,57 @@ jobs:
       
       - name: Run Smoke Test
         run: |
-          # Start server in the background
-          gunicorn application:application --daemon
+          # Start server with explicit binding
+          gunicorn --bind 0.0.0.0:5000 application:application --access-logfile - &
+          GUNICORN_PID=$!
 
-          # Wait for the server to start
-          sleep 10
+          # Wait for server with retries
+          echo "Waiting for server to start..."
+          for i in {1..10}; do
+            if curl -s -o /dev/null http://127.0.0.1:5000; then
+              echo "Server is up!"
+              break
+            fi
+            sleep 3
+            echo "Retry $i/10"
+          done
+
+          # Verify server is running
+          if ! ps -p $GUNICORN_PID > /dev/null; then
+            echo "Error: Gunicorn failed to start"
+            exit 1
+          fi
 
           # Test homepage
           HTTP_CODE=$(curl -so /dev/null -w "%{http_code}" http://127.0.0.1:5000)
           if [ "$HTTP_CODE" -ne 200 ]; then
-            printf "Error: Smoke test failed: Homepage returned $HTTP_CODE\n"
-            pkill -f gunicorn
+            printf "Error: Homepage test failed: Homepage returned $HTTP_CODE\n"
+            kill $GUNICORN_PID
             exit 1
           fi
-            printf "Smoke test passed: Homepage returned $HTTP_CODE\n"
+            printf "Homepage test passed: Homepage returned $HTTP_CODE\n"
           
           # Test API endpoint
-          API_RESPONSE=$(curl -s http://127.0.0.1:5000/api/v1.0/weather?location=London)
-          if ! echo "$API_RESPONSE" | grep -q '"weather"'; then
-            printf "Error: API test failed"
-            pkill -f gunicorn
-            exit 1
-          fi
-            printf "API test passed: API returned valid response\n"
-
-          API_RESPONSE=$(curl -s http://127.0.0.1:5000/api/v1.0/temperature?location=Manchester)
-          if ! echo "$API_RESPONSE" | grep -q '"temperature"'; then
-            printf "Error: API test failed"
-            pkill -f gunicorn
-            exit 1
-          fi
-            printf "API test passed: API returned valid response\n"
-
-          API_RESPONSE=$(curl -s http://127.0.0.1:5000/api/v1.0/wind?location=Glasgow)
-          if ! echo "$API_RESPONSE" | grep -q '"wind speed"'; then
-            printf "Error: API test failed"
-            pkill -f gunicorn
-            exit 1
-          fi
-            printf "API test passed: API returned valid response\n"
-
-          API_RESPONSE=$(curl -s http://127.0.0.1:5000/api/v1.0/humidity?location=Birmingham)
-          if ! echo "$API_RESPONSE" | grep -q '"humidity"'; then
-            printf "Error: API test failed"
-            pkill -f gunicorn
-            exit 1
-          fi
-            printf "API test passed: API returned valid response\n"
+          test_endpoint() {
+            local url="$1"
+            local keyword="$2"
+            echo "Testing $url"
+            response=$(curl -s "$url")
+            if ! echo "$response" | grep -q "$keyword"; then
+              echo "Error: Missing '$keyword' in response: $response"
+              kill $GUNICORN_PID
+              exit 1
+            fi
+            echo "✅ $url passed"
+          }
+      
+          test_endpoint "http://127.0.0.1:5000/api/v1.0/weather?location=London" '"weather"'
+          test_endpoint "http://127.0.0.1:5000/api/v1.0/temperature?location=Manchester" '"temperature"'
+          test_endpoint "http://127.0.0.1:5000/api/v1.0/wind?location=Glasgow" '"wind speed"'
+          test_endpoint "http://127.0.0.1:5000/api/v1.0/humidity?location=Birmingham" '"humidity"'
 
           # Clean up
-          pkill -f gunicorn
+          kill $GUNICORN_PID
           printf "All smoke tests passed\n"
 
       

@@ -17,22 +17,12 @@ jobs:
         with:
           python-version: '3.10'
 
-      - name: Load and cache dependencies
-        id: lint
-        uses: ./.github/actions/cached-deps
-        with:
-          cache-dependencies: 'false'
-          
+      - name: install dependencies
+        run: |
+          pip install flake8
+
       - name: Run linter
         run: flake8 .
-
-      - name: Output cache confirmation
-        run: |
-          if [[ "${{ steps.lint.outputs.cache-confirmation }}" != 'false' ]]; then
-            echo "Cache: True"
-          else
-            echo "Cache: False"
-          fi
 
   test:
     runs-on: ubuntu-latest
@@ -44,22 +34,12 @@ jobs:
         uses: actions/setup-python@v5
         with:
           python-version: '3.10'
-          cache: 'pip'
 
       - name: Install dependencies
         run: |
           pip install -r requirements.txt
-          pip install flake8 pytest  # Ensure pytest is explicitly installed
-
-      # - name: Load and cache dependencies
-      #   id: test
-      #   uses: ./.github/actions/cached-deps
-      #   with:
-      #     cache-dependencies: 'true'
 
       - name: Run Unit Test
-        id: unit-test
-        #run: ${{ env.pythonLocation }}/bin/python -m pytest tests/ -v
         run: pytest tests/ -v
 
       - name: Run Smoke Test

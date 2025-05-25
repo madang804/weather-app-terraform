@@ -34,14 +34,11 @@ jobs:
         with:
           python-version: '3.12'
       
-      - name: Debug HOME variable
-        run: |
-          echo "HOME is set to $HOME"
-          pwd
-          ls -la
-      
       - name: Create pip cache directory
         run: mkdir -p "$HOME/.cache/pip"
+      
+      - name: Debug cache directory
+        run: ls -la "$HOME/.cache/"
 
       - name: Cache Python packages
         id: cache-python

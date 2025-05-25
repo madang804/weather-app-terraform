@@ -38,7 +38,7 @@ jobs:
         id: cache-python
         uses: actions/cache@v4
         with:
-          path: ~.cache
+          path: ${{ env.HOME }}/.cache
           key: ${{ runner.os }}-python-${{ hashFiles('**/requirements.txt') }}
 
       - name: Install dependencies

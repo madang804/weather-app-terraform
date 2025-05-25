@@ -34,6 +34,9 @@ jobs:
         with:
           python-version: '3.12'
       
+      - name: Create cache directory
+        run: mkdir -p "$HOME/.cache/pip"
+      
       - name: Debug cache directory
         run: ls -la "$HOME/.cache/"
 

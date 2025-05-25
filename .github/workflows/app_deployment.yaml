@@ -35,13 +35,13 @@ jobs:
           python-version: '3.12'
       
       - name: Create pip cache directory
-        run: mkdir -p ~/.cache/pip
+        run: mkdir -p "$HOME/.cache/pip"
 
       - name: Cache Python packages
         id: cache-python
         uses: actions/cache@v4
         with:
-          path: ~/.cache/pip
+          path: $HOME/.cache/pip
           key: ${{ runner.os }}-python-${{ hashFiles('**/requirements.txt') }}
 
       - name: Install dependencies

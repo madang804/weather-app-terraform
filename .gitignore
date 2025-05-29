@@ -174,3 +174,195 @@ poetry.toml
 pyrightconfig.json
 
 # End of https://www.toptal.com/developers/gitignore/api/python
+
+Skip to content
+DEV Community
+Find related posts...
+Powered by  Algolia
+Log in
+Create account
+
+0
+Jump to Comments
+
+0
+Save
+
+Boost
+
+leroykayanda
+leroykayanda
+Posted on 16 Mar 2023 • Edited on 16 Mar 2024
+
+.gitignore & .terraformignore for terraform files
+.gitignore
+
+# Local .terraform directories
+**/.terraform/*
+
+# .tfstate files
+*.tfstate
+*.tfstate.*
+
+# Crash log files
+crash.log
+crash.*.log
+
+# Exclude all .tfvars files, which are likely to contain sensitive data, such as
+# password, private keys, and other secrets. These should not be part of version 
+# control as they are data points which are potentially sensitive and subject 
+# to change depending on the environment.
+*.tfvars
+*.tfvars.json
+
+# Ignore override files as they are usually used to override resources locally and so
+# are not checked in
+override.tf
+override.tf.json
+*_override.tf
+*_override.tf.json
+
+# Include override files you do wish to add to version control using negated pattern
+# !example_override.tf
+
+# Include tfplan files to ignore the plan output of command: terraform plan -out=tfplan
+# example: *tfplan*
+
+# Ignore CLI configuration files
+.terraformrc
+terraform.rc
+
+**/.terraform.lock.hcl
+
+**/.DS_Store
+.terraformignore
+
+# controls what directories get uploaded to TFC for remote runs
+#
+# deny by default
+*
+# explicitly list included directories
+!terraform/
+terraform/.terraform/providers/**
+profile
+ACI.dev
+Promoted
+
+ACI image
+
+ACI.dev: The Only MCP Server Your AI Agents Need
+ACI.dev’s open-source tool-use platform and Unified MCP Server turns 600+ functions into two simple MCP tools on one server—search and execute. Comes with multi-tenant auth and natural-language permission scopes. 100% open-source under Apache 2.0.
+
+Star our GitHub!
+
+Top comments (0)
+Subscribe
+pic
+Add to the discussion
+Code of Conduct • Report abuse
+profile
+Postmark
+Promoted
+
+Postmark Image
+
+The email service that speaks your language
+Whether you code in Ruby, PHP, Python, C#, or Rails, Postmark's robust API libraries make integration a breeze. Plus, bootstrapping your startup? Get 20% off your first three months!
+
+Start free
+
+
+leroykayanda
+Follow
+Interested in all things DevOps.
+Location
+Nairobi Kenya
+Joined
+4 Feb 2022
+More from leroykayanda
+Cache Busting in Ionic 3
+Setting an IPSEC VPN using VyOS in AWS
+Connect to AWS RDS using IAM credentials
+profile
+Sentry
+Promoted
+
+Sentry image
+
+Make it make sense
+Only the context you need to fix your broken code with Sentry.
+
+Start debugging →
+
+# Local .terraform directories
+**/.terraform/*
+
+# .tfstate files
+*.tfstate
+*.tfstate.*
+
+# Crash log files
+crash.log
+crash.*.log
+
+# Exclude all .tfvars files, which are likely to contain sensitive data, such as
+# password, private keys, and other secrets. These should not be part of version 
+# control as they are data points which are potentially sensitive and subject 
+# to change depending on the environment.
+*.tfvars
+*.tfvars.json
+
+# Ignore override files as they are usually used to override resources locally and so
+# are not checked in
+override.tf
+override.tf.json
+*_override.tf
+*_override.tf.json
+
+# Include override files you do wish to add to version control using negated pattern
+# !example_override.tf
+
+# Include tfplan files to ignore the plan output of command: terraform plan -out=tfplan
+# example: *tfplan*
+
+# Ignore CLI configuration files
+.terraformrc
+terraform.rc
+
+**/.terraform.lock.hcl
+
+**/.DS_Store
+💎 DEV Diamond Sponsors
+
+Thank you to our Diamond Sponsors for supporting the DEV Community
+
+Neon - Official Database Partner
+Neon is the official database partner of DEV
+
+Algolia - Official Search Partner
+Algolia is the official search partner of DEV
+
+DEV Community — A space to discuss and keep up software development and manage your software career
+
+Home
+DEV++
+Reading List
+Podcasts
+Videos
+Tags
+DEV Help
+Forem Shop
+Advertise on DEV
+DEV Challenges
+DEV Showcase
+About
+Contact
+Free Postgres Database
+Software comparisons
+Code of Conduct
+Privacy Policy
+Terms of use
+Built on Forem — the open source software that powers DEV and other inclusive communities.
+
+Made with love and Ruby on Rails. DEV Community © 2016 - 2025.
+

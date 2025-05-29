@@ -55,10 +55,13 @@ jobs:
         with:
           path: ./.cache/pip
           key: ${{ runner.os }}-python-${{ hashFiles('**/requirements.txt') }}
+          restore-keys: |
+            ${{ runner.os }}-python-
+            ${{ runner.os }}-
+            python-
 
       - name: Install dependencies
-        if: steps.cache-python.outputs.cache-hit != 'true'
         run: python -m pip install --cache-dir=./.cache/pip -r requirements.txt
-
+      
       - name: Run Unit Test
         run: python -m pytest tests/ -v

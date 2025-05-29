@@ -1,4 +1,3 @@
-
-output "aws_beanstalk_app" {
-    value = aws_elastic_beanstalk_application.app.arn
+output "app_url" {
+  value = aws_elastic_beanstalk_environment.env.cname_prefix
 }

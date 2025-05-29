@@ -1,3 +1,3 @@
-app_name = "weatherAPI"
+app_name = "weather-app"
 env_name = "staging"
-ver = "v1.0"
+ver      = "v1.0"

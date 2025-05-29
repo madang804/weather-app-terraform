@@ -32,6 +32,11 @@ jobs:
       - name: Checkout code
         uses: actions/checkout@v4
 
+      - name: Set AWS Credentials
+        run: |
+          echo "AWS_ACCESS_KEY_ID=${{ secrets.AWS_ACCESS_KEY_ID }}" >> $GITHUB_ENV
+          echo "AWS_SECRET_ACCESS_KEY=${{ secrets.AWS_SECRET_ACCESS_KEY }}" >> $GITHUB_ENV
+
       - name: Set up terraform
         uses: hashicorp/setup-terraform@v3
         with:

@@ -49,12 +49,11 @@ jobs:
         run: terraform init
       
       - name: Terraform plan
-        run: terraform plan -out=tfplan
+        run: terraform plan
 
       - name: Terraform apply
         run: |
-          terraform apply -auto-approve tfplan
-          echo "APP_URL=${terraform output -raw app_url}" >> $GITHUB_ENV
+          terraform apply -auto-approve && echo "APP_URL=${terraform output -raw app_url}" >> $GITHUB_ENV
 
   api-test:
     needs: terraform

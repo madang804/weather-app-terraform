@@ -23,45 +23,66 @@ jobs:
       - name: Run linter
         run: ruff check .
 
-  test:
-    strategy:
-      matrix:
-        OS: ["ubuntu-24.04", "ubuntu-22.04", "macos-15", "macos-14", "macos-13", "windows-2025", "windows-2022", "windows-2019"]
-        python-version: ["3.13", "3.12", "3.11", "3.10", "3.9"]  
-    runs-on: ${{ matrix.OS }}
+  terraform:
+    runs-on: ubuntu-24.04
+    defaults:
+      run:
+        working-directory: terraform
     steps:
       - name: Checkout code
         uses: actions/checkout@v4
 
-      - name: Set up Python
-        continue-on-error: true
-        uses: actions/setup-python@v5
+      - name: Set up terraform
+        uses: hashicorp/setup-terraform@v3
         with:
-          python-version: ${{ matrix.python-version }}
-      
-      - name: Create cache directory for Linux and macOS
-        if: runner.os != 'Windows'
-        shell: bash
-        run: mkdir -p "./.cache/pip"
-        
-      - name: Create cache directory for Windows
-        if: runner.os == 'Windows'
-        shell: cmd
-        run: mkdir .\.cache\pip
-      
-      - name: Cache Python packages
-        id: cache-python
-        uses: actions/cache@v4
-        with:
-          path: ./.cache/pip
-          key: ${{ runner.os }}-python-${{ hashFiles('**/requirements.txt') }}
-          restore-keys: |
-            ${{ runner.os }}-python-
-            ${{ runner.os }}-
-            python-
+          terraform_version: 1.12.1
 
-      - name: Install dependencies
-        run: python -m pip install --cache-dir=./.cache/pip -r requirements.txt
+      - name: Run zip-app.sh script
+        run: ./zip-app.sh
       
-      - name: Run Unit Test
-        run: python -m pytest tests/ -v
+      - name: Terraform initialise
+        run: terraform init
+      
+      - name: Terraform plan
+        run: terraform plan -out=tfplan
+
+      - name: Terraform apply
+        run: |
+          terraform apply -auto-approve tfplan
+          echo "APP_URL=${terraform output -raw app_url}" >> $GITHUB_ENV
+
+  api-test:
+    needs: terraform
+    runs-on: ubuntu-24.04
+    defaults:
+      run:
+        working-directory: terraform
+    steps:
+      - name: Test homepage
+        run: |
+          HTTP_CODE=$(curl -so /dev/null -w "%{http_code}" http://)
+          if [ "$HTTP_CODE" -ne 200 ]; then
+            printf "Error: Homepage test failed: Homepage returned $HTTP_CODE\n"
+            kill $GUNICORN_PID
+            exit 1
+          fi
+            printf "Homepage test passed: Homepage returned $HTTP_CODE\n"
+      
+      - name: Test endpoint
+        run: |
+          test_endpoint() {
+            local url="$1"
+            local keyword="$2"
+            echo "Testing $url"
+            response=$(curl -s "$url")
+            if ! echo "$response" | grep -q "$keyword"; then
+              echo "Error: Missing '$keyword' in response: $response"
+              exit 1
+            fi
+            echo "✅ $url passed"
+          }
+      
+          test_endpoint "http://${APP_URL}/api/v1.0/weather?location=London" '"weather"'
+          test_endpoint "http://${APP_URL}/api/v1.0/temperature?location=Manchester" '"temperature"'
+          test_endpoint "http://${APP_URL}/api/v1.0/wind?location=Glasgow" '"wind speed"'
+          test_endpoint "http://${APP_URL}/api/v1.0/humidity?location=Birmingham" '"humidity"'

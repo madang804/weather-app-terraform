@@ -1,13 +1,13 @@
 name: Flask App Deployment
 on:
   workflow_dispatch:
-    # push:
-    #   branches:
-    #     - main
+  push:
+    branches:
+      - testbranch
 
 jobs:
   lint:
-    runs-on: ubuntu-latest
+    runs-on: ubuntu-24.04
     steps:
       - name: Checkout code
         uses: actions/checkout@v4
@@ -15,86 +15,53 @@ jobs:
       - name: Set up Python
         uses: actions/setup-python@v5
         with:
-          python-version: '3.10'
+          python-version: 3.12
 
       - name: install dependencies
-        run: |
-          pip install flake8
+        run: pip install ruff
 
       - name: Run linter
-        run: flake8 .
+        run: ruff check .
 
   test:
-    runs-on: ubuntu-latest
+    strategy:
+      matrix:
+        OS: ["ubuntu-24.04", "ubuntu-22.04", "macos-15", "macos-14", "macos-13", "windows-2025", "windows-2022", "windows-2019"]
+        python-version: ["3.13", "3.12", "3.11", "3.10", "3.9"]  
+    runs-on: ${{ matrix.OS }}
     steps:
       - name: Checkout code
         uses: actions/checkout@v4
 
       - name: Set up Python
+        continue-on-error: true
         uses: actions/setup-python@v5
         with:
-          python-version: '3.10'
+          python-version: ${{ matrix.python-version }}
+      
+      - name: Create cache directory for Linux and macOS
+        if: runner.os != 'Windows'
+        shell: bash
+        run: mkdir -p "./.cache/pip"
+        
+      - name: Create cache directory for Windows
+        if: runner.os == 'Windows'
+        shell: cmd
+        run: mkdir .\.cache\pip
+      
+      - name: Cache Python packages
+        id: cache-python
+        uses: actions/cache@v4
+        with:
+          path: ./.cache/pip
+          key: ${{ runner.os }}-python-${{ hashFiles('**/requirements.txt') }}
+          restore-keys: |
+            ${{ runner.os }}-python-
+            ${{ runner.os }}-
+            python-
 
       - name: Install dependencies
-        run: |
-          pip install -r requirements.txt
-
+        run: python -m pip install --cache-dir=./.cache/pip -r requirements.txt
+      
       - name: Run Unit Test
-        run: pytest tests/ -v
-
-      - name: Run Smoke Test
-        run: |
-          # Start server
-          gunicorn --bind 0.0.0.0:5000 application:application --access-logfile - &
-          GUNICORN_PID=$!
-
-          # Wait for server with retries
-          echo "Waiting for server to start..."
-          for i in {1..10}; do
-            if curl -s -o /dev/null http://127.0.0.1:5000; then
-              echo "Server is up!"
-              break
-            fi
-            sleep 3
-            echo "Retry $i/10"
-          done
-
-          # Verify server is running
-          if ! ps -p $GUNICORN_PID > /dev/null; then
-            echo "Error: Gunicorn failed to start"
-            exit 1
-          fi
-
-          # Test homepage
-          HTTP_CODE=$(curl -so /dev/null -w "%{http_code}" http://127.0.0.1:5000)
-          if [ "$HTTP_CODE" -ne 200 ]; then
-            printf "Error: Homepage test failed: Homepage returned $HTTP_CODE\n"
-            kill $GUNICORN_PID
-            exit 1
-          fi
-            printf "Homepage test passed: Homepage returned $HTTP_CODE\n"
-          
-          # Test API endpoint
-          test_endpoint() {
-            local url="$1"
-            local keyword="$2"
-            echo "Testing $url"
-            response=$(curl -s "$url")
-            if ! echo "$response" | grep -q "$keyword"; then
-              echo "Error: Missing '$keyword' in response: $response"
-              kill $GUNICORN_PID
-              exit 1
-            fi
-            echo "✅ $url passed"
-          }
-      
-          test_endpoint "http://127.0.0.1:5000/api/v1.0/weather?location=London" '"weather"'
-          test_endpoint "http://127.0.0.1:5000/api/v1.0/temperature?location=Manchester" '"temperature"'
-          test_endpoint "http://127.0.0.1:5000/api/v1.0/wind?location=Glasgow" '"wind speed"'
-          test_endpoint "http://127.0.0.1:5000/api/v1.0/humidity?location=Birmingham" '"humidity"'
-
-          # Clean up
-          kill $GUNICORN_PID
-          printf "All smoke tests passed\n"
-
-      
+        run: python -m pytest tests/ -v

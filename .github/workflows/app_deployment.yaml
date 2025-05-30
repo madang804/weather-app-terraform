@@ -25,6 +25,8 @@ jobs:
 
   terraform-deployment:
     runs-on: ubuntu-24.04
+    outputs:
+      APP_URL: ${{ steps.publish.outputs.APP_URL }}
     defaults:
       run:
         working-directory: terraform
@@ -53,8 +55,9 @@ jobs:
 
       - name: Terraform apply
         run: |
+          id: publish
           terraform apply -auto-approve
-          echo "APP_URL=$(terraform output -raw app_url)" >> $GITHUB_ENV
+          echo "APP_URL=$(terraform output -raw app_url)" >> $GITHUB_OUTPUT
 
   test-endpoints:
     needs: terraform-deployment
@@ -65,6 +68,9 @@ jobs:
     steps:
       - name: Checkout code
         uses: actions/checkout@v4      
+
+      - name: Pass app url
+        run: echo "APP_URL=${{ needs.terraform-deployment.outputs.APP_URL }}" >> $GITHUB_ENV
 
       - name: Test homepage
         run: |

@@ -54,8 +54,8 @@ jobs:
         run: terraform plan
 
       - name: Terraform apply
+        id: publish
         run: |
-          id: publish
           terraform apply -auto-approve
           echo "APP_URL=$(terraform output -raw app_url)" >> $GITHUB_OUTPUT
 

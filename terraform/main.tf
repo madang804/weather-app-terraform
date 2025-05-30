@@ -60,13 +60,23 @@ resource "aws_s3_bucket" "app_bucket" {
   bucket = "${aws_elastic_beanstalk_application.app.name}-bucket-${data.aws_caller_identity.current.account_id}"
 }
 
-# Create S3 Bucket Object i.e. zipped Flask app
+# Create S3 Bucket Object to store zipped Flask app
 resource "aws_s3_object" "app_object" {
   bucket = aws_s3_bucket.app_bucket.id
   key    = "application.zip"
   source = "application.zip"
 
-  #    depends_on = [null_resource.zip_app]
+  depends_on = [null_resource.zip_app]
+}
+
+resource "null_resource" "zip_app" {
+  provisioner "local-exec" {
+    command = "./zip_app.sh"
+  }
+
+  triggers = {
+    always_run = "${timestamp()}"
+  }
 }
 
 # Create Elastic Beanstalk Application

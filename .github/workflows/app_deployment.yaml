@@ -23,7 +23,7 @@ jobs:
       - name: Run linter
         run: ruff check .
 
-  terraform:
+  terraform-deployment:
     runs-on: ubuntu-24.04
     defaults:
       run:
@@ -56,13 +56,16 @@ jobs:
           terraform apply -auto-approve
           echo "APP_URL=$(terraform output -raw app_url)" >> $GITHUB_ENV
 
-  api-test:
-    needs: terraform
+  test-endpoints:
+    needs: terraform-deployment
     runs-on: ubuntu-24.04
     defaults:
       run:
         working-directory: terraform
     steps:
+      - name: Checkout code
+        uses: actions/checkout@v4      
+
       - name: Test homepage
         run: |
           HTTP_CODE=$(curl -so /dev/null -w "%{http_code}" "${APP_URL}")
@@ -72,7 +75,7 @@ jobs:
           fi
             printf "Homepage test passed: Homepage returned $HTTP_CODE\n"
       
-      - name: Test endpoint
+      - name: Test endpoints
         run: |
           test_endpoint() {
             local url="$1"

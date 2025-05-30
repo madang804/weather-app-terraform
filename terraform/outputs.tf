@@ -1,3 +1,3 @@
 output "app_url" {
-  value = aws_elastic_beanstalk_environment.env.cname_prefix
+  value = "http://${aws_elastic_beanstalk_environment.env.endpoint_url}"
 }

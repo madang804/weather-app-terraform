@@ -53,7 +53,8 @@ jobs:
 
       - name: Terraform apply
         run: |
-          terraform apply -auto-approve && echo "APP_URL=${terraform output -raw app_url}" >> $GITHUB_ENV
+          terraform apply -auto-approve
+          echo "APP_URL=$(terraform output -raw app_url)" >> $GITHUB_ENV
 
   api-test:
     needs: terraform
@@ -64,10 +65,9 @@ jobs:
     steps:
       - name: Test homepage
         run: |
-          HTTP_CODE=$(curl -so /dev/null -w "%{http_code}" http://)
+          HTTP_CODE=$(curl -so /dev/null -w "%{http_code}" "${APP_URL}")
           if [ "$HTTP_CODE" -ne 200 ]; then
             printf "Error: Homepage test failed: Homepage returned $HTTP_CODE\n"
-            kill $GUNICORN_PID
             exit 1
           fi
             printf "Homepage test passed: Homepage returned $HTTP_CODE\n"
@@ -86,7 +86,7 @@ jobs:
             echo "✅ $url passed"
           }
       
-          test_endpoint "http://${APP_URL}/api/v1.0/weather?location=London" '"weather"'
-          test_endpoint "http://${APP_URL}/api/v1.0/temperature?location=Manchester" '"temperature"'
-          test_endpoint "http://${APP_URL}/api/v1.0/wind?location=Glasgow" '"wind speed"'
-          test_endpoint "http://${APP_URL}/api/v1.0/humidity?location=Birmingham" '"humidity"'
+          test_endpoint "${APP_URL}/api/v1.0/weather?location=London" '"weather"'
+          test_endpoint "${APP_URL}/api/v1.0/temperature?location=Manchester" '"temperature"'
+          test_endpoint "${APP_URL}/api/v1.0/wind?location=Glasgow" '"wind speed"'
+          test_endpoint "${APP_URL}/api/v1.0/humidity?location=Birmingham" '"humidity"'

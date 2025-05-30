@@ -44,6 +44,11 @@ jobs:
         with:
           terraform_version: 1.12.1
 
+      - name: Run zip-app.sh script
+        run: |
+          chmod +x zip-app.sh
+          ./zip-app.sh
+      
       - name: Terraform initialise
         run: terraform init
       

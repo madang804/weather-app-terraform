@@ -65,18 +65,6 @@ resource "aws_s3_object" "app_object" {
   bucket = aws_s3_bucket.app_bucket.id
   key    = "application.zip"
   source = "application.zip"
-
-  depends_on = [null_resource.zip_app]
-}
-
-resource "null_resource" "zip_app" {
-  provisioner "local-exec" {
-    command = "./zip_app.sh"
-  }
-
-  triggers = {
-    always_run = "${timestamp()}"
-  }
 }
 
 # Create Elastic Beanstalk Application

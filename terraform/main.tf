@@ -55,16 +55,16 @@ resource "aws_iam_role_policy_attachment" "role_policy_attachment" {
   role       = aws_iam_role.role.name
 }
 
-# Create S3 Bucket to store Flask app
+# Create S3 Bucket to store Flask app image
 resource "aws_s3_bucket" "app_bucket" {
   bucket = "${aws_elastic_beanstalk_application.app.name}-bucket-${data.aws_caller_identity.current.account_id}"
 }
 
-# Create S3 Bucket Object to store zipped Flask app
+# Create S3 Bucket Object to store zipped Dockerrun.aws.json file
 resource "aws_s3_object" "app_object" {
   bucket = aws_s3_bucket.app_bucket.id
-  key    = "application.zip"
-  source = "application.zip"
+  key    = "Dockerrun.aws.json.zip"
+  source = "Dockerrun.aws.json.zip"
 }
 
 # Create Elastic Beanstalk Application
@@ -94,23 +94,5 @@ resource "aws_elastic_beanstalk_environment" "env" {
   application         = aws_elastic_beanstalk_application.app.name
   cname_prefix        = "weather-app"
   version_label       = aws_elastic_beanstalk_application_version.app_version.name
-  solution_stack_name = "64bit Amazon Linux 2023 v4.5.1 running Python 3.11"
-
-  setting {
-    namespace = "aws:autoscaling:launchconfiguration"
-    name      = "IamInstanceProfile"
-    value     = aws_iam_instance_profile.ec2_instance_profile.name
+  solution_stack_name = "Docker AL2023 version 4.5.2"
   }
-
-  setting {
-    namespace = "aws:autoscaling:launchconfiguration"
-    name      = "InstanceType"
-    value     = "t2.micro"
-  }
-
-  setting {
-    namespace = "aws:elasticbeanstalk:environment"
-    name      = "LoadBalancerType"
-    value     = "application"
-  }
-}

@@ -248,6 +248,10 @@ profile
 ACI.dev
 Promoted
 
+# explicitly include Dockerfile and Dockerrun.aws.json
+!Dockerfile
+!Dockerrun.aws.json
+
 ACI image
 
 ACI.dev: The Only MCP Server Your AI Agents Need

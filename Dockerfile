@@ -1,4 +1,4 @@
-FROM python:3.9-slim
+FROM python:3.13.3-alpine3.22
 
 WORKDIR /app
 
@@ -7,13 +7,9 @@ COPY requirements.txt /app/
 
 RUN pip install --upgrade pip && pip install -r requirements.txt
 
-# Copy the current directory contents into the container at /app
 COPY . /app
 
 EXPOSE 5000
 
-# Define environment variable for production (optional)
-ENV FLASK_ENV=staging
-
-# Run the application using Gunicorn for staging
+# Run the application using Gunicorn
 CMD ["gunicorn", "--bind", "0.0.0.0:5000", "application:application"]

@@ -3,7 +3,7 @@ on:
   workflow_dispatch:
   push:
     branches:
-      - testbranch
+      - docker
 
 jobs:
   lint:
@@ -18,12 +18,14 @@ jobs:
           python-version: 3.12
 
       - name: install dependencies
-        run: pip install ruff
+        run: |
+          python -m pip install --upgrade pip
+          python -m pip install ruff
 
       - name: Run linter
-        run: ruff check .
+        run: python -m ruff check .
 
-  test:
+  pytest-host:
     strategy:
       matrix:
         OS: ["ubuntu-24.04", "ubuntu-22.04", "macos-15", "macos-14", "macos-13", "windows-2025", "windows-2022", "windows-2019"]
@@ -34,34 +36,51 @@ jobs:
         uses: actions/checkout@v4
 
       - name: Set up Python
-        continue-on-error: true
         uses: actions/setup-python@v5
         with:
           python-version: ${{ matrix.python-version }}
-      
-      - name: Create cache directory for Linux and macOS
-        if: runner.os != 'Windows'
-        shell: bash
-        run: mkdir -p "./.cache/pip"
-        
-      - name: Create cache directory for Windows
-        if: runner.os == 'Windows'
-        shell: cmd
-        run: mkdir .\.cache\pip
-      
-      - name: Cache Python packages
-        id: cache-python
-        uses: actions/cache@v4
-        with:
-          path: ./.cache/pip
-          key: ${{ runner.os }}-python-${{ hashFiles('**/requirements.txt') }}
-          restore-keys: |
-            ${{ runner.os }}-python-
-            ${{ runner.os }}-
-            python-
 
       - name: Install dependencies
-        run: python -m pip install --cache-dir=./.cache/pip -r requirements.txt
+        run: |
+          python -m pip install --upgrade pip
+          python -m pip install -r requirements.txt
       
       - name: Run Unit Test
         run: python -m pytest tests/ -v
+  
+  docker-build:
+    runs-on: ubuntu-24.04
+    needs: pytest-host
+    steps:
+      - name: Checkout code
+        uses: actions/checkout@v4
+
+      - name: Set up Docker Buildx
+        uses: docker/setup-buildx-action@v3
+
+      - name: Log in to Docker Hub
+        uses: docker/login-action@v3
+        with:
+          username: ${{ secrets.DOCKER_USERNAME }}
+          password: ${{ secrets.DOCKER_PASSWORD }}
+
+      - name: Build and push Docker image
+        uses: docker/build-push-action@v6
+        with:
+          context: .
+          file: ./Dockerfile
+          push: true
+          tags: ${{ secrets.DOCKER_USERNAME }}/flask-app:v1
+  
+  pytest-container:
+    runs-on: ubuntu-24.04
+    needs: docker-build
+    steps:
+      - name: Checkout code
+        uses: actions/checkout@v4
+
+      - name: Set up Docker Buildx
+        uses: docker/setup-buildx-action@v3
+
+      - name: Run tests in Docker container
+        run: docker run --rm --mount type=bind,src=${{ github.workspace }},dst=/app ${{ secrets.DOCKER_USERNAME }}/flask-app:v1 python -m pytest tests/ -v

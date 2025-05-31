@@ -83,4 +83,4 @@ jobs:
         uses: docker/setup-buildx-action@v3
 
       - name: Run tests in Docker container
-        run: docker run --rm --mount src=${{ github.workspace }},dst=/app ${{ secrets.DOCKER_USERNAME }}/flask-app:v1 python -m pytest tests/ -v
+        run: docker run --rm --mount type=bind,src=${{ github.workspace }},dst=/app ${{ secrets.DOCKER_USERNAME }}/flask-app:v1 python -m pytest tests/ -v

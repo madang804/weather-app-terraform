@@ -1,9 +1,21 @@
 name: Flask App Deployment
 on:
   workflow_dispatch:
-  push:
-    branches:
-      - terraform
+    inputs:
+      job_to_run:
+        description: 'Select the job to run'
+        required: true
+        default: 'lint'
+        type: choice
+        options:
+          - lint
+          - pytest-host
+          - docker-build
+          - pytest-container
+          - deploy-test-webapp
+  # push:
+  #   branches:
+  #     - terraform
 
 jobs:
   lint:
@@ -86,8 +98,10 @@ jobs:
         run: docker run --rm --mount type=bind,src=${{ github.workspace }},dst=/app ${{ secrets.DOCKER_USERNAME }}/flask-app:v1 python -m pytest tests/ -v
 
   deploy-test-webapp:
+    deploy:
+      if: ${{ inputs.job_to_run == 'deploy-test-webapp' }}
     runs-on: ubuntu-24.04
-    needs: pytest-container
+    # needs: pytest-container
     defaults:
       run:
         working-directory: ./terraform

@@ -183,37 +183,75 @@ The API is designed to simulate weather data for a given location.
 
 ## Deploying to AWS Elastic Beanstalk
 
-The Flask app is deployed to AWS Elastic Beanstalk via terraform (IaC). Below is a step-by-step guide.
+The Flask app is deployed to AWS Elastic Beanstalk via terraform (IaC). We have chosen docker platform here. Below is a step-by-step guide.
 
 ### Prerequisites
-- terraform installed.
+- aws account
 - awscli installed.
+- docker installed.
+- docker hub account
+- terraform installed.
 - curl installed.
 - jq installed (optional).
 
-1. Change to terraform directory
+1. Build Flask app docker image and upload to docker hub
+   ```bash
+   # Login to docker hub
+   docker login -u <DOCKER_USERNAME> -p <DOCKER_PASSWORD>
+   # Build Flask app docker image
+   docker build -t <DOCKER_USERNAME>/flask-app:v1
+   # Upload Flask app docker image to docker hub
+   docker push <DOCKER_USERNAME>/flask-app:v1
+   ```
+2. Run Flask app container
+   ```bash
+   docker run --rm -p 5000:5000 <DOCKER_USERNAME>/flask-app:v1
+   ```
+3. Test endpoints
+   ```bash
+   curl http://localhost:5000
+   ```
+   ```bash
+   curl -s http://localhost:5000/api/v1.0/weather?location=london | jq .
+   ```
+   ```bash
+   curl -s http://localhost:5000/api/v1.0/weather?location=birmingham | jq .
+   ```
+   ```bash
+   curl -s http://localhost:5000/api/v1.0/weather?location=manchester | jq .
+   ```
+3. Change to terraform directory
    ```bash
    cd terraform
    ```
-1. Ensure `zip_app.sh` is executable.
+4. Zip Dockerrun.aws.json.
    ```bash
-   chmod +x zip_app.sh
+   # Ensure `zip-Dockerrun.aws.json.sh` is executable
+   chmod +x zip-Dockerrun.aws.json.sh
+   ./zip-Dockerrun.aws.json.sh
    ```
-2. Run these Terraform commands to deploy Flask app to AWS Elastic Beanstalk.
+5. Run these Terraform commands to deploy Flask app to AWS Elastic Beanstalk.
    ```bash
    terraform init
-   terraform plan
    terraform apply -auto-approve
    ```
-3. Test API
+6. Copy URL
    ```bash
-   curl -s http://weather-api.eu-west-2.elasticbeanstalk.com/api/v1.0/weather?location=london | jq .
+   # Run the command and copy the URL for Flask app homepage from the output
+   terraform output -raw app_url
+   ```
+8. Test endpoints in AWS cloud
+   ```bash
+   curl -s <paste_URL_here>
    ```
    ```bash
-   curl -s http://weather-api.eu-west-2.elasticbeanstalk.com/api/v1.0/temperature?location=london | jq .
+   curl -s <paste_URL_here>/api/v1.0/weather?location=edinburgh | jq .
    ```
    ```bash
-   curl -s http://weather-api.eu-west-2.elasticbeanstalk.com/api/v1.0/wind?location=london | jq .
+   curl -s <paste_URL_here>/api/v1.0/temperature?location=new castle | jq .
+   ```
+   ```bash
+   curl -s <paste_URL_here>/api/v1.0/wind?location=ipswich | jq .
    ```
 4. Run this command to destroy deployed AWS resources.
    ```bash

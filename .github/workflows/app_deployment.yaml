@@ -88,6 +88,7 @@ jobs:
   deploy-test-webapp:
     runs-on: ubuntu-24.04
     needs: pytest-container
+    working-directory: ./terraform
     steps:
       - name: Checkout code
         uses: actions/checkout@v4

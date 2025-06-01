@@ -94,5 +94,5 @@ resource "aws_elastic_beanstalk_environment" "env" {
   application         = aws_elastic_beanstalk_application.app.name
   cname_prefix        = "weather-app"
   version_label       = aws_elastic_beanstalk_application_version.app_version.name
-  solution_stack_name = "Docker AL2023 version 4.5.2"
+  platform_arn        = "arn:aws:elasticbeanstalk:${var.region}::platform/Docker AL2023/4.5.2"
   }

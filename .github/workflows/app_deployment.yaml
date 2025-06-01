@@ -98,8 +98,7 @@ jobs:
         run: docker run --rm --mount type=bind,src=${{ github.workspace }},dst=/app ${{ secrets.DOCKER_USERNAME }}/flask-app:v1 python -m pytest tests/ -v
 
   deploy-test-webapp:
-    deploy:
-      if: ${{ inputs.job_to_run == 'deploy-test-webapp' }}
+    if: ${{ inputs.job_to_run == 'deploy-test-webapp' }}
     runs-on: ubuntu-24.04
     # needs: pytest-container
     defaults:

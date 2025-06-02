@@ -135,53 +135,53 @@ jobs:
         run: |
           terraform apply -auto-approve
       
-    test-web_app_endpoints:
-      needs: deploy-web_app
-      runs-on: ubuntu-24.04
-      env:
-        APP_URL: ${{ needs.deploy-web_app.outputs.app_url }}
-      defaults:
-        run:
-          working-directory: ./terraform
-      steps:
-        - name: Test homepage
-          run: |
-            HTTP_CODE=$(curl -so /dev/null -w "%{http_code}" "${APP_URL}")
-            if [ "$HTTP_CODE" -ne 200 ]; then
-              printf "Error: Homepage test failed: Homepage returned $HTTP_CODE\n"
+  test-web_app_endpoints:
+    needs: deploy-web_app
+    runs-on: ubuntu-24.04
+    env:
+      APP_URL: ${{ needs.deploy-web_app.outputs.app_url }}
+    defaults:
+      run:
+        working-directory: ./terraform
+    steps:
+      - name: Test homepage
+        run: |
+          HTTP_CODE=$(curl -so /dev/null -w "%{http_code}" "${APP_URL}")
+          if [ "$HTTP_CODE" -ne 200 ]; then
+            printf "Error: Homepage test failed: Homepage returned $HTTP_CODE\n"
+            exit 1
+          fi
+            printf "Homepage test passed: Homepage returned $HTTP_CODE\n"
+      
+      - name: Test endpoints
+        run: |
+          test_endpoint() {
+            local url="$1"
+            local keyword="$2"
+            echo "Testing $url"
+            response=$(curl -s "$url")
+            if ! echo "$response" | grep -q "$keyword"; then
+              echo "Error: Missing '$keyword' in response: $response"
               exit 1
             fi
-              printf "Homepage test passed: Homepage returned $HTTP_CODE\n"
-        
-        - name: Test endpoints
-          run: |
-            test_endpoint() {
-              local url="$1"
-              local keyword="$2"
-              echo "Testing $url"
-              response=$(curl -s "$url")
-              if ! echo "$response" | grep -q "$keyword"; then
-                echo "Error: Missing '$keyword' in response: $response"
-                exit 1
-              fi
-              echo "✅ $url passed"
-            }
-        
-            test_endpoint "${APP_URL}/api/v1.0/weather?location=London" '"weather"'
-            test_endpoint "${APP_URL}/api/v1.0/temperature?location=Manchester" '"temperature"'
-            test_endpoint "${APP_URL}/api/v1.0/wind?location=Glasgow" '"wind speed"'
-            test_endpoint "${APP_URL}/api/v1.0/humidity?location=Birmingham" '"humidity"'
+            echo "✅ $url passed"
+          }
+      
+          test_endpoint "${APP_URL}/api/v1.0/weather?location=London" '"weather"'
+          test_endpoint "${APP_URL}/api/v1.0/temperature?location=Manchester" '"temperature"'
+          test_endpoint "${APP_URL}/api/v1.0/wind?location=Glasgow" '"wind speed"'
+          test_endpoint "${APP_URL}/api/v1.0/humidity?location=Birmingham" '"humidity"'
 
-    clean up:
-      if: always()
-      needs: [deploy-web_app, test-web_app_endpoints]
-      runs-on: ubuntu-24.04    
-      steps:  
-        - name: Clean up resources
-          run: |
-            terraform destroy -auto-approve
-            echo "Resources cleaned up successfully."
-            aws s3 rm "s3://$(aws s3 ls | awk '{print $3}')" --recursive # Delete S3 bucket objects
-            aws s3api delete-bucket-policy --bucket "$(aws s3 ls | awk '{print $3}')" # Delete S3 bucket policy
-            aws s3api delete-bucket --bucket "$(aws s3 ls | awk '{print $3}')" # Delete S3 bucket
-            echo "S3 bucket and its contents deleted successfully."
+  clean up:
+    if: always()
+    needs: [deploy-web_app, test-web_app_endpoints]
+    runs-on: ubuntu-24.04    
+    steps:  
+      - name: Clean up resources
+        run: |
+          terraform destroy -auto-approve
+          echo "Resources cleaned up successfully."
+          aws s3 rm "s3://$(aws s3 ls | awk '{print $3}')" --recursive # Delete S3 bucket objects
+          aws s3api delete-bucket-policy --bucket "$(aws s3 ls | awk '{print $3}')" # Delete S3 bucket policy
+          aws s3api delete-bucket --bucket "$(aws s3 ls | awk '{print $3}')" # Delete S3 bucket
+          echo "S3 bucket and its contents deleted successfully."

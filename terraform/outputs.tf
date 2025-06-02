@@ -1,4 +1,5 @@
 
-output "aws_beanstalk_app" {
-    value = aws_elastic_beanstalk_application.app.arn
+output "app_url" {
+  value = "http://${aws_elastic_beanstalk_environment.env.endpoint_url}"
 }
+

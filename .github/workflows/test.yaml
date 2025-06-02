@@ -110,7 +110,7 @@ jobs:
       runs-on: ubuntu-24.04
       run:
         working-directory: ./terraform
-      env:
+      environment:
         AWS_ACCESS_KEY_ID: ${{ secrets.AWS_ACCESS_KEY_ID }}
         AWS_SECRET_ACCESS_KEY: ${{ secrets.AWS_SECRET_ACCESS_KEY }}
     steps:
@@ -139,7 +139,7 @@ jobs:
       needs: deploy-web_app
       defaults:
         runs-on: ubuntu-24.04
-        env:
+        environment:
           APP_URL: ${{ needs.deploy-web_app.outputs.app_url }}
       working-directory: ./terraform
       steps:

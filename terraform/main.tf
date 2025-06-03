@@ -20,7 +20,7 @@ resource "tfe_organization" "my-organization" {
   name  = "python-flask-app"
 }
 
-resource "tfe_workspace" "test" {
+resource "tfe_workspace" "weather_app_workspace" {
   name         = "weather-app"
   organization = tfe_organization.my-organization.name
   tags         = {

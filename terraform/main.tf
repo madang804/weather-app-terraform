@@ -1,5 +1,12 @@
 terraform {
+  backend "remote" {
+    hostname = "app.terraform.io"
+  }
   required_providers {
+    tfe = {
+      source = "hashicorp/tfe"
+      version = "~>0.66.0"
+    }
     aws = {
       source  = "hashicorp/aws"
       version = "~>5.96.0"
@@ -7,17 +14,19 @@ terraform {
   }
 }
 
-provider "aws" {
-  region = var.region
-  default_tags {
-    tags = {
-      Environment = "Production"
-      Name        = "WeatherApp"
-    }
-  }
+data "aws_caller_identity" "current" {}
+
+resource "tfe_organization" "my-organization" {
+  name  = "python-flask-app"
 }
 
-data "aws_caller_identity" "current" {}
+resource "tfe_workspace" "test" {
+  name         = "weather-app"
+  organization = tfe_organization.my-organization.name
+  tags         = {
+      environment = "stage"
+  }
+}
 
 # Create IAM Role
 resource "aws_iam_role" "role" {

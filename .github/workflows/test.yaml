@@ -42,7 +42,7 @@ jobs:
     # if: ${{ inputs.job_to_run == 'pytest-host' }}
     strategy:
       matrix:
-        OS: ["ubuntu-24.04", "ubuntu-22.04", "macos-15", "macos-14", "macos-13", "windows-2025", "windows-2022", "windows-2019"]
+        OS: ["ubuntu-24.04", "ubuntu-22.04", "macos-15", "macos-14", "macos-13", "windows-2025", "windows-2022"]
         python-version: ["3.13", "3.12", "3.11", "3.10", "3.9"]  
     runs-on: ${{ matrix.OS }}
     steps:

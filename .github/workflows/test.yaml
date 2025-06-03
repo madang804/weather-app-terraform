@@ -1,6 +1,6 @@
 name: Flask App Deployment
-on:
-  workflow_dispatch:
+on: workflow_dispatch
+  # workflow_dispatch:
     # inputs:
     #   job_to_run:
     #     description: 'Select the job to run'
@@ -19,7 +19,7 @@ on:
 
 jobs:
   lint:
-    if: ${{ inputs.job_to_run == 'lint' }}
+    # if: ${{ inputs.job_to_run == 'lint' }}
     runs-on: ubuntu-24.04
     steps:
       - name: Checkout code

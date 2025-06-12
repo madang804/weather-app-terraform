@@ -4,7 +4,7 @@ terraform {
   }
   required_providers {
     tfe = {
-      source = "hashicorp/tfe"
+      source  = "hashicorp/tfe"
       version = "~>0.66.0"
     }
     aws = {
@@ -17,15 +17,13 @@ terraform {
 data "aws_caller_identity" "current" {}
 
 resource "tfe_organization" "my-organization" {
-  name  = "python-flask-app"
+  name = "python-flask-app"
+  email = "admin@company.com"
 }
 
 resource "tfe_workspace" "weather_app_workspace" {
   name         = "weather-app"
   organization = tfe_organization.my-organization.name
-  tags         = {
-      environment = "stage"
-  }
 }
 
 # Create IAM Role
@@ -99,11 +97,11 @@ resource "aws_elastic_beanstalk_application_version" "app_version" {
 
 # Create Elastic Beanstalk Environment
 resource "aws_elastic_beanstalk_environment" "env" {
-  name                = var.env_name
-  application         = aws_elastic_beanstalk_application.app.name
-  cname_prefix        = "weather-app"
-  version_label       = aws_elastic_beanstalk_application_version.app_version.name
-  platform_arn        = "arn:aws:elasticbeanstalk:${var.region}::platform/Docker running on 64bit Amazon Linux 2023/4.5.2"
+  name          = var.env_name
+  application   = aws_elastic_beanstalk_application.app.name
+  cname_prefix  = "weather-app"
+  version_label = aws_elastic_beanstalk_application_version.app_version.name
+  platform_arn  = "arn:aws:elasticbeanstalk:${var.region}::platform/Docker running on 64bit Amazon Linux 2023/4.5.2"
 
   setting {
     namespace = "aws:autoscaling:launchconfiguration"

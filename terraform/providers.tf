@@ -1,5 +1,5 @@
 provider "tfe" {
-  token = "${TERRAFORM_TOKEN_app_terraform_io}"
+  token = TERRAFORM_TOKEN_app_terraform_io
 }
 
 provider "aws" {

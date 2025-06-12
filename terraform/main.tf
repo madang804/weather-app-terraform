@@ -1,6 +1,10 @@
 terraform {
   backend "remote" {
-    hostname = "app.terraform.io"
+    hostname     = "app.terraform.io"
+    organization = "Madan0804-Org"
+    workspaces {
+      name = "python-flask-app"
+    }
   }
   required_providers {
     tfe = {
@@ -16,15 +20,15 @@ terraform {
 
 data "aws_caller_identity" "current" {}
 
-resource "tfe_organization" "my-organization" {
-  name = "python-flask-app"
-  email = "admin@company.com"
-}
+# resource "tfe_organization" "my-organization" {
+#   name  = "python-flask-app"
+#   email = "admin@company.com"
+# }
 
-resource "tfe_workspace" "weather_app_workspace" {
-  name         = "weather-app"
-  organization = tfe_organization.my-organization.name
-}
+# resource "tfe_workspace" "weather_app_workspace" {
+#   name         = "weather-app"
+#   organization = tfe_organization.my-organization.name
+# }
 
 # Create IAM Role
 resource "aws_iam_role" "role" {

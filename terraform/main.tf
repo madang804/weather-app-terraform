@@ -1,6 +1,5 @@
 terraform {
-  backend "remote" {
-    hostname     = "app.terraform.io"
+  cloud {
     organization = "Madan0804-Org"
     workspaces {
       name = "python-flask-app"

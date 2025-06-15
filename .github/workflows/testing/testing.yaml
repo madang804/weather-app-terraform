@@ -1,6 +1,5 @@
 name: Flask App Testing
 on:
-  workflow_dispatch
   push:
     branches:
       - main

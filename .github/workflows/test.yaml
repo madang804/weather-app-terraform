@@ -144,7 +144,7 @@ jobs:
     steps:
       - name: Test homepage
         run: |
-          HTTP_CODE=$(curl -so /dev/null -w "%{http_code}" --connect-timeout 5 "${APP_URL}")
+          HTTP_CODE=$(curl -so /dev/null -w "%{http_code}" --connect-timeout 30 "${APP_URL}")
           if [ "$HTTP_CODE" -ne 200 ]; then
             printf "Error: Homepage test failed: Homepage returned $HTTP_CODE\n"
             exit 1

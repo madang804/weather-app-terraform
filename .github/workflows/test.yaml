@@ -110,7 +110,7 @@ jobs:
       AWS_SECRET_ACCESS_KEY: ${{ secrets.AWS_SECRET_ACCESS_KEY }}
       TF_TOKEN_app_terraform_io: ${{ secrets.TF_API_TOKEN }}
     outputs:
-      app_url: $(terraform output -raw app_url)
+      app_url: ${{ steps.get_app_url.outputs.app_url }}
     defaults:
       run:
         working-directory: ./terraform
@@ -135,7 +135,11 @@ jobs:
       - name: Terraform apply
         run: |
           terraform apply -auto-approve
-      
+
+      - name: Get app_url output from Terraform
+        id: get_app_url
+        run: echo "app_url=$(terraform output -raw app_url)" >> $GITHUB_OUTPUT
+
   test-web_app_endpoints:
     needs: deploy-web_app
     runs-on: ubuntu-24.04

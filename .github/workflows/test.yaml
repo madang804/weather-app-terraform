@@ -194,6 +194,9 @@ jobs:
         with:
           terraform_version: 1.12.1
       
+      - name: Terraform initialise
+        run: terraform init
+
       - name: Clean up resources
         run: |
           terraform destroy -auto-approve

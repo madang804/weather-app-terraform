@@ -10,7 +10,6 @@ on:
         options:
           - deploy-web_app
           - destroy-web_app
-environment: staging
 
 jobs:
   deploy-web_app:

@@ -2,8 +2,8 @@ name: Flask App Deploy or Destroy
 on:
   workflow_dispatch:
     inputs:
-      job_to_run:
-        description: 'Select the job to run'
+      action:
+        description: 'Select the action'
         required: true
         default: 'deploy'
         type: choice

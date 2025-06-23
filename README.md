@@ -23,10 +23,10 @@ This project consists of:
 ## API Endpoints
 
 - `GET /` - Homepage
-- `GET /api/v1.0/weather?location={location}` - Get complete weather data
-- `GET /api/v1.0/temperature?location={location}` - Get temperature data
-- `GET /api/v1.0/wind?location={location}` - Get wind data
-- `GET /api/v1.0/humidity?location={location}` - Get humidity data
+- `GET /api/v1.0/weather?location=<location>` - Get complete weather data
+- `GET /api/v1.0/temperature?location=<location>` - Get temperature data
+- `GET /api/v1.0/wind?location=<location>` - Get wind data
+- `GET /api/v1.0/humidity?location=<location>` - Get humidity data
 
 ## Prerequisites
 

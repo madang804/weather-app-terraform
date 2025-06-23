@@ -1,293 +1,137 @@
-# Weather App
+# Weather App with Terraform Deployment
 
-![License](https://img.shields.io/badge/license-MIT-blue.svg)  
-A simple web API built with Python and Flask that provides weather-related information. This service is designed to allow other web applications to connect and retrieve random weather data for a location parameter.
+A simple web API built with Python and Flask that provides weather-related information, deployed to AWS Elastic Beanstalk using Terraform.
 
----
+## Project Overview
 
-## Table of Contents
-1. [About the Project](#about-the-project)
-2. [Endpoints](#endpoints)
-3. [Getting Started](#getting-started)
-4. [Deploying to AWS Elastic Beanstalk](#deploying-to-aws-elastic-beanstalk)
-5. [Reference](#reference)
-6. [License](#license)
+This project consists of:
+- A Python Flask application that serves weather data via API endpoints
+- Terraform infrastructure as code to deploy the app to AWS Elastic Beanstalk
+- GitHub Actions CI/CD pipeline for automated testing and deployment
+- Docker containerization for consistent deployment
 
----
+## Features
 
-## About the Project
-This Flask-based web App provides four endpoints for weather-related information:
-- `weather`
-- `temperature`
-- `wind speed and direction`
-- `humidity`
+- RESTful API endpoints for weather data
+- Random weather data generation based on location parameter
+- Infrastructure as Code with Terraform
+- Automated CI/CD pipeline with GitHub Actions
+- Multi-platform testing support
+- Docker containerization
 
-The API is designed to simulate weather data for a given location.
+## API Endpoints
 
----
+- `GET /` - Homepage
+- `GET /api/v1.0/weather?location={location}` - Get complete weather data
+- `GET /api/v1.0/temperature?location={location}` - Get temperature data
+- `GET /api/v1.0/wind?location={location}` - Get wind data
+- `GET /api/v1.0/humidity?location={location}` - Get humidity data
 
-## Endpoints
+## Prerequisites
 
-### 1. Weather
-- **Endpoint:** `/weather`
-- **Method:** `GET`
-- **Query Parameters:**
-  - `location` (required): The location for which weather data is requested.
-- **Response:** A random weather description (e.g., sunny, cloudy, rainy).
+- Python 3.9+
+- Docker
+- Terraform
+- AWS account with appropriate permissions
+- GitHub account
 
-### 2. Temperature
-- **Endpoint:** `/temperature`
-- **Method:** `GET`
-- **Query Parameters:**
-  - `location` (required): The location for which temperature data is requested.
-- **Response:** A random temperature in celsius.
+## Installation
 
-### 3. Wind Speed and Direction
-- **Endpoint:** `/wind`
-- **Method:** `GET`
-- **Query Parameters:**
-  - `location` (required): The location for which wind speed and direction data is requested.
-- **Response:** A random wind speed (e.g., 15 kts) and direction (e.g., 45 deg).
-
-### 4. Humidity
-- **Endpoint:** `/humidity`
-- **Method:** `GET`
-- **Query Parameters:**
-  - `location` (required): The location for which temperature data is requested.
-- **Response:** A random humidity in percent.
-
----
-
-## Getting Started
-
-### Select your OS
-
-<details>
-<summary>Windows</summary>
-
-### Prerequisites
-- Windows 10
-- Python (3.13.x) and pip (25.1.x) installed.
-- Git (2.49.x) installed.
-- Other versions may not work.
+### Local Development
 
 1. Clone the repository:
-   ```cmd
-   git clone https://github.com/madang804/weather-app.git
+   ```bash
+   git clone https://github.com/<your-username>/weather-app-terraform.git
+   cd weather-app-terraform
    ```
-2. Navigate to project directory:
-   ```cmd
-   cd weather-app
-   ```
-3. Create a virtual environment:
-   ```cmd
+2. Set up a virtual environment and install dependencies:
+   ```bash
    python -m venv venv
+   source venv/bin/activate  # On Windows: venv\Scripts\activate
+   pip install -r requirements.txt   
    ```
-4. Activate virtual environment:
-   ```cmd
-   venv\Scripts\activate
-   ```
-5. Install dependencies:
-   ```cmd
-   pip install -r requirements.txt
-   ```
-6. Run Flask app:
-   ```cmd
-   flask --app application run
-   ```
-7. Open a browser and visit `http://127.0.0.1:5000` to test API locally.
-8. Deactivate virtual environment:
-   ```cmd
-   deactivate
-   ```
-</details>
-
-<details>
-<summary>MacOS</summary>
-
-### Prerequisites
-- Python and pip installed.
-- Git installed.
-- Not tested but should work fine.
-
-1. Clone the repository:
+3. Run the application locally:
    ```bash
-   git clone https://github.com/madang804/weather-app.git
-   ```
-2. Navigate to project directory:
-   ```bash
-   cd weather-app
-   ```
-3. Create a virtual environment:
-   ```bash
-   python3 -m venv venv
-   ```
-4. Activate virtual environment:
-   ```bash
-   source venv/bin/activate
-   ```
-5. Install dependencies:
-   ```bash
-   pip install -r requirements.txt
-   ```
-6. Run Flask app:
-   ```bash
-   gunicorn application:application
-   ```
-7. Open a browser and visit `http://127.0.0.1:5000` to test the API locally.
-8. Deactivate virtual environment:
-   ```bash
-   deactivate
-   ```
-</details>
-
-<details>
-<summary>Linux</summary>
-
-### Prerequisites
-- Ubuntu 22.04.x LTS
-- Python (3.10.x) and pip (22.0.x) installed.
-- Git (2.34.x) installed.
-- Other versions may not work.
-
-1. Clone the repository:
-   ```bash
-   git clone https://github.com/madang804/weather-app.git
-   ```
-2. Navigate to project directory:
-   ```bash
-   cd weather-app
-   ```
-3. Create a virtual environment:
-   ```bash
-   python3 -m venv venv
-   ```
-4. Activate virtual environment:
-   ```bash
-   source venv/bin/activate
-   ```
-5. Install dependencies:
-   ```bash
-   pip install -r requirements.txt
-   ```
-6. Run Flask app:
-   ```bash
-   gunicorn application:application
-   ```
-7. Open a browser and visit `http://127.0.0.1:5000` to test the API locally.
-8. Deactivate virtual environment:
-   ```bash
-   deactivate
-   ```
-</details>
-
-## Deploying to AWS Elastic Beanstalk
-
-The Flask app is deployed to AWS Elastic Beanstalk via terraform (IaC). We have chosen docker platform here. Below is a step-by-step guide.
-
-### Prerequisites
-- aws account
-- awscli installed.
-- docker installed.
-- docker hub account
-- terraform installed.
-- curl installed.
-- jq installed (optional).
-
-1. Build Flask app docker image and upload to docker hub
-   ```bash
-   # Login to docker hub
-   docker login -u <DOCKER_USERNAME> -p <DOCKER_PASSWORD>
-   # Build Flask app docker image
-   docker build -t <DOCKER_USERNAME>/flask-app:v1
-   # Upload Flask app docker image to docker hub
-   docker push <DOCKER_USERNAME>/flask-app:v1
-   ```
-2. Run Flask app container
-   ```bash
-   docker run --rm -p 5000:5000 <DOCKER_USERNAME>/flask-app:v1
-   ```
-3. Test endpoints
-   ```bash
-   curl http://localhost:5000
-   ```
-   ```bash
-   curl -s http://localhost:5000/api/v1.0/weather?location=london | jq .
-   ```
-   ```bash
-   curl -s http://localhost:5000/api/v1.0/weather?location=birmingham | jq .
-   ```
-   ```bash
-   curl -s http://localhost:5000/api/v1.0/weather?location=manchester | jq .
-   ```
-3. Change to terraform directory
-   ```bash
-   cd terraform
-   ```
-4. Zip Dockerrun.aws.json.
-   ```bash
-   # Ensure `zip-Dockerrun.aws.json.sh` is executable
-   chmod +x zip-Dockerrun.aws.json.sh
-   ./zip-Dockerrun.aws.json.sh
-   ```
-5. Run these Terraform commands to deploy Flask app to AWS Elastic Beanstalk.
-   ```bash
-   terraform init
-   terraform apply -auto-approve
-   ```
-6. Copy URL
-   ```bash
-   # Run the command and copy the URL for Flask app homepage from the output
-   terraform output -raw app_url
-   ```
-8. Test endpoints in AWS cloud
-   ```bash
-   curl -s <paste_URL_here>
-   ```
-   ```bash
-   curl -s <paste_URL_here>/api/v1.0/weather?location=edinburgh | jq .
-   ```
-   ```bash
-   curl -s <paste_URL_here>/api/v1.0/temperature?location=new castle | jq .
-   ```
-   ```bash
-   curl -s <paste_URL_here>/api/v1.0/wind?location=ipswich | jq .
-   ```
-4. Run this command to destroy deployed AWS resources.
-   ```bash
-   terraform destroy -auto-approve
-   ```
-5. NOTE: AWS Elastic Beanstalk automatically creates an S3 bucket which is not managed by terraform code. AWS recommends to manually delete the bucket to avoid incurring charges.
-   ```bash
-   # Delete S3 bucket objects
-   aws s3 rm "s3://$(aws s3 ls | awk '{print $3}')" --recursive
-   
-   # Delete S3 bucket policy
-   aws s3api delete-bucket-policy --bucket "$(aws s3 ls | awk '{print $3}')"
-   
-   # Delete S3 bucket
-   aws s3api delete-bucket --bucket "$(aws s3 ls | awk '{print $3}')"
+   flask run   
    ```
 
----
+## Docker
 
-## Reference
+1. Build the Docker image:
+   ```bash
+   docker build -t weather-app .   
+   ```
+2. Run the container:
+   ```bash
+   docker run -p 5000:5000 weather-app   
+   ```
 
-- https://www.python.org
-- https://flask.palletsprojects.com
-- https://developer.hashicorp.com/terraform
-- https://registry.terraform.io/providers/hashicorp/aws/latest/docs
-- https://docs.aws.amazon.com/elasticbeanstalk/latest/dg/Welcome.html
+## Deployment
 
----
+The project is configured with GitHub Actions to automatically:
+- Run linting and tests
+- Build and push Docker image
+- Deploy to AWS Elastic Beanstalk using Terraform
+- Test the deployed endpoints
+- Clean up resources (optional)
+
+## Manual Deployment with Terraform
+
+1. Navigate to the terraform directory:
+   ```bash
+   cd terraform   
+   ```
+2. Initialise Terraform:
+   ```bash
+   terraform init   
+   ```
+3. Apply the configuration:
+   ```bash
+   terraform apply -auto-approve   
+   ```
+
+## CI/CD Pipeline
+
+The GitHub Actions workflow performs the following steps:
+- Linting: Runs Ruff linter on Python code
+- Unit Testing: Runs pytest across multiple OS and Python versions
+- Docker Build: Builds and pushes Docker image to Docker Hub
+- Container Testing: Runs tests inside the built Docker container
+- Terraform Deployment: Deploys infrastructure to AWS
+- Endpoint Testing: Tests all API endpoints after deployment
+- Clean-up: Optionally destroys resources after testing
+
+## Environment Variables
+
+Required environment variables for deployment:
+- AWS_ACCESS_KEY_ID
+- AWS_SECRET_ACCESS_KEY
+- TF_TOKEN_app_terraform_io (Terraform Cloud API token)
+- DOCKER_USERNAME
+- DOCKER_PASSWORD
+
+These should be set as GitHub Secrets in your repository settings.
+
+## Testing
+
+Run tests locally with:
+   ```bash
+   python -m pytest tests/ -v   
+   ```
+
+The CI pipeline includes comprehensive testing across:
+- Multiple operating systems (Ubuntu, macOS, Windows)
+- Multiple Python versions (3.9-3.13)
+- Both host and container environments
 
 ## License
-This project is licensed under the MIT License. See [LICENSE](./LICENSE) for more details.
 
----
+This project is licensed under the terms of the MIT License.
 
+## Contributing
 
+Contributions are welcome! Please open an issue or submit a pull request.
 
+## Support
 
-
-
+For support, please open an issue in the GitHub repository.

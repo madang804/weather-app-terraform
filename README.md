@@ -1,5 +1,6 @@
 # Weather App with Terraform Deployment
 
+![License](https://img.shields.io/badge/license-MIT-blue.svg)
 A simple web API built with Python and Flask that provides weather-related information, deployed to AWS Elastic Beanstalk using Terraform.
 
 ## Project Overview
@@ -126,7 +127,7 @@ The CI pipeline includes comprehensive testing across:
 
 ## License
 
-This project is licensed under the terms of the MIT License.
+This project is licensed under the terms of the MIT License. See [LICENSE](./LICENSE) for more details.
 
 ## Contributing
 

@@ -5,20 +5,14 @@ A simple web API built with Python and Flask that provides weather-related infor
 
 ## Project Overview
 
+![weather-app-terraform.png](./png/weather-app-terraform.png)
+
 This project consists of:
 - A Python Flask application that serves weather data via API endpoints
 - Terraform infrastructure as code to deploy the app to AWS Elastic Beanstalk
+- Hashicorp cloud platform to store Terraform state file
 - GitHub Actions CI/CD pipeline for automated testing and deployment
 - Docker containerization for consistent deployment
-
-## Features
-
-- RESTful API endpoints for weather data
-- Random weather data generation based on location parameter
-- Infrastructure as Code with Terraform
-- Automated CI/CD pipeline with GitHub Actions
-- Multi-platform testing support
-- Docker containerization
 
 ## API Endpoints
 
@@ -32,64 +26,11 @@ This project consists of:
 
 - Python 3.9+
 - Docker
+- Dockerhub account
 - Terraform
+- Hashicorp cloud platform account
 - AWS account with appropriate permissions
 - GitHub account
-
-## Installation
-
-### Local Development
-
-1. Clone the repository:
-   ```bash
-   git clone https://github.com/<your-username>/weather-app-terraform.git
-   cd weather-app-terraform
-   ```
-2. Set up a virtual environment and install dependencies:
-   ```bash
-   python -m venv venv
-   source venv/bin/activate  # On Windows: venv\Scripts\activate
-   pip install -r requirements.txt   
-   ```
-3. Run the application locally:
-   ```bash
-   flask run   
-   ```
-
-## Docker
-
-1. Build the Docker image:
-   ```bash
-   docker build -t weather-app .   
-   ```
-2. Run the container:
-   ```bash
-   docker run -p 5000:5000 weather-app   
-   ```
-
-## Deployment
-
-The project is configured with GitHub Actions to automatically:
-- Run linting and tests
-- Build and push Docker image
-- Deploy to AWS Elastic Beanstalk using Terraform
-- Test the deployed endpoints
-- Clean up resources (optional)
-
-## Manual Deployment with Terraform
-
-1. Navigate to the terraform directory:
-   ```bash
-   cd terraform   
-   ```
-2. Initialise Terraform:
-   ```bash
-   terraform init   
-   ```
-3. Apply the configuration:
-   ```bash
-   terraform apply -auto-approve   
-   ```
 
 ## CI/CD Pipeline
 
@@ -107,18 +48,13 @@ The GitHub Actions workflow performs the following steps:
 Required environment variables for deployment:
 - AWS_ACCESS_KEY_ID
 - AWS_SECRET_ACCESS_KEY
-- TF_TOKEN_app_terraform_io (Terraform Cloud API token)
+- TF_TOKEN_app_terraform_io (Hashicorpt Cloud API token)
 - DOCKER_USERNAME
 - DOCKER_PASSWORD
 
 These should be set as GitHub Secrets in your repository settings.
 
 ## Testing
-
-Run tests locally with:
-   ```bash
-   python -m pytest tests/ -v   
-   ```
 
 The CI pipeline includes comprehensive testing across:
 - Multiple operating systems (Ubuntu, macOS, Windows)
@@ -132,7 +68,3 @@ This project is licensed under the terms of the MIT License. See [LICENSE](./LIC
 ## Contributing
 
 Contributions are welcome! Please open an issue or submit a pull request.
-
-## Support
-
-For support, please open an issue in the GitHub repository.
